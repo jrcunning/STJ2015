@@ -1,0 +1,79 @@
+# Upload sequence data to remote server
+cd ~/Documents/Academia/HIMB/USVI/STJ2015/data/seqs
+scp -r fastq/ ross@166.122.79.21:~/STJ2015/data/seqs
+scp fastq_list.txt ross@166.122.79.21:~/STJ2015/data/seqs/fastq
+ssh ross@166.122.79.21
+cd ~/STJ2015/data/seqs/fastq
+
+# Generate config files for merging reads with illumina-utils
+iu-gen-configs fastq_list.txt
+
+# Merge sequences for each sample (in parallel, 22 at a time)
+for i in $(seq 1 $(ls -1 *.ini | wc -l))
+do
+  file=$(ls -1 *.ini | head -$i | tail -1)
+  iu-merge-pairs  $file  --min-overlap-size 150 --enforce-Q30-check --marker-gene-stringent &
+  if (( $i % 22 == 0 )); then wait; fi
+done
+wait
+
+# Filter sequences - keep only those with 0 mismatches (stringent!)
+for i in *_MERGED
+do
+iu-filter-merged-reads $i --max-mismatches 0
+done
+
+# Count sequences
+for i in *_MERGED-MAX-MISMATCH-0
+do
+echo $i
+grep -c '>' $i
+done
+
+# Add QIIME labels
+add_qiime_labels.py -m ../mapping_file.txt -i . -c InputFileName -o ..
+
+#-------------------------
+
+cd ..
+
+# Chimera checking
+identify_chimeric_seqs.py -i combined_seqs.fna --suppress_usearch61_ref -m usearch61 -o usearch61_chimeras
+filter_fasta.py -f combined_seqs.fna -o seqs_chimera_filtered.fasta -s usearch61_chimeras/chimeras.txt -n
+
+# Split into individual samples to cluster within samples
+split_fasta_on_sample_ids.py -i seqs_chimera_filtered.fasta -o split
+
+
+
+#### STOPPED HERE JULY 17, 2016
+
+# OTU clustering at 97% similarity
+pick_otus.py -i seqs_chimera_filtered.fasta -s 0.97 -o OTUs_97
+
+# Pick representative sequence set
+pick_rep_set.py -i OTUs_97/seqs_chimera_filtered_otus.txt -m most_abundant -f seqs_chimera_filtered.fasta -o OTUs_97/rep_set.fasta
+count_seqs.py -i OTUs_97/rep_set.fasta
+
+# Assign taxonomy by blast
+assign_taxonomy.py -i OTUs_97/rep_set.fasta -r Unaligned_ITS2_Database_23April13.fasta -t id_to_taxonomy_subtype_mod.txt -m blast -o OTUs_97/blast_taxonomy
+
+# Add clade to tax table
+cut -d$'\t' -f4- OTUs_97/blast_taxonomy/rep_set_tax_assignments.txt | cut -c-1 | paste - OTUs_97/blast_taxonomy/rep_set_tax_assignments.txt > OTUs_97/blast_taxonomy/rep_set_tax_table.txt
+
+# Make list of "no blast hits"
+awk '/No blast hit/' OTUs_97/blast_taxonomy/rep_set_tax_assignments.txt > OTUs_97/blast_taxonomy/no_hits.txt
+ 
+# Make OTU table excluding no blast hits
+make_otu_table.py -i OTUs_97/seqs_chimera_filtered_otus.txt -t OTUs_97/blast_taxonomy/rep_set_tax_assignments.txt -e OTUs_97/blast_taxonomy/no_hits.txt -o OTUs_97/otu_table.biom
+
+biom convert -i OTUs_97/otu_table.biom -o OTUs_97/otu_table.tsv -b
+
+# bring results back to local machine
+cd ~/Documents/Academia/HIMB/USVI/2012sequencing/STJ2012
+scp ross@166.122.79.21:~/USVI/20151023seqs/OTUs_97/otu_table.tsv .
+scp ross@166.122.79.21:~/USVI/20151023seqs/id_to_taxonomy_subtype_mod.txt .
+scp ross@166.122.79.21:~/USVI/20151023seqs/OTUs_97/blast_taxonomy/rep_set_tax_table.txt .
+scp ross@166.122.79.21:~/USVI/20151023seqs/mapping_file.txt .
+
+
