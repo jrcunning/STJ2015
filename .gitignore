@@ -2,3 +2,5 @@
 .Rproj.user
 data/fastq
 data/merge
+data/fasta
+data/otus_97_bysample
