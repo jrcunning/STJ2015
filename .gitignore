@@ -5,3 +5,4 @@ data/merge
 data/fasta
 data/otus_97_bysample/*
 !data/otus_97_bysample/nw_tophits.tsv
+!data/otus_97_bysample/all_rep_set_rep_set.fasta
