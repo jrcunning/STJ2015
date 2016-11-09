@@ -3,4 +3,5 @@
 data/fastq
 data/merge
 data/fasta
-data/otus_97_bysample
+data/otus_97_bysample/*
+!data/otus_97_bysample/nw_tophits.tsv
