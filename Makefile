@@ -1,3 +1,5 @@
+all: data/STJ2015_sym data/STJ2015_100_sym
+
 data/STJ2015_sym.RData: data/STJ2015.RData
 	R --vanilla < ~/SymITS2/filter_notsym.R --args data/STJ2015.RData data/otus_97_bysample/all_rep_set_rep_set.fasta data/STJ2015_sym.RData
 
