@@ -127,7 +127,7 @@ cladeAbund
 
 # Are Clade I's real?
 CladeI <- subset_taxa(phy97.f.p, Clade=="I")
-tax_table(CladeI)
+#tax_table(CladeI)
 
 
 # Clades by sample
@@ -357,5 +357,12 @@ watr.net <- makenet(watr97.f.p, 0)
 set.seed(54538)
 plotnet(watr.net)
 ```
+
+## Alpha diversity in water
+```{r, fig.height=4, fig.width=8}
+plot_richness(subset_samples(phy97.f, Species=="Water"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Water"), x="Location")
+```
+
 
 
