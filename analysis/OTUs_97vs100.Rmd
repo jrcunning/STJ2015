@@ -1,0 +1,361 @@
+---
+title: 'OTUs: 97% vs 100%'
+author: "Ross Cunning"
+date: "3/9/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 3, digits = 9)
+```
+
+```{r setup_2, include=FALSE}
+# Load all R scripts in "R/" directory
+source("R/functions.R")
+# Load package libraries
+library(phyloseq); library(vegan); library(multcompView); library(reshape2); library(igraph); library(stringr)
+# Set colors for plotting clades
+taxcolors <- matrix(c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462"), 
+                    dimnames=list(c("CladeA", "CladeB", "CladeC", "CladeD", "CladeF", "CladeG")))
+```
+
+```{r}
+# Load phyloseq objects
+load("data/STJ2015_100_sym.RData"); phy100.f <- phy.f
+load("data/STJ2015_sym.RData"); phy97.f <- phy.f
+
+# Filter OTUs by minimum count
+# Set threshold count
+n <- 10
+# Identify OTUs below threshold count
+taxa97 <- taxa_sums(phy97.f)[which(taxa_sums(phy97.f) >= n)]
+taxa100 <- taxa_sums(phy100.f)[which(taxa_sums(phy100.f) >= n)]
+# Remove taxa below threshold count
+phy97.f <- prune_taxa(names(taxa97), phy97.f)
+phy100.f <- prune_taxa(names(taxa100), phy100.f)
+
+# Filter samples by minimum count
+# Set threshold number of reads
+sn <- 100
+# Remove samples with fewer reads than threshold
+phy97.f <- prune_samples(sample_sums(phy97.f)>=sn, phy97.f)
+phy100.f <- prune_samples(sample_sums(phy100.f)>=sn, phy100.f)
+
+# Filter OTUs by minimum count again in case any dropped below threshold after filtering samples
+# Identify OTUs below threshold count
+taxa97 <- taxa_sums(phy97.f)[which(taxa_sums(phy97.f) >= n)]
+taxa100 <- taxa_sums(phy100.f)[which(taxa_sums(phy100.f) >= n)]
+# Remove taxa below threshold count
+phy97.f <- prune_taxa(names(taxa97), phy97.f)
+phy100.f <- prune_taxa(names(taxa100), phy100.f)
+
+# Label clades and subtypes for filtered phyloseq object tax_tables
+get.st <- function(df) {
+  within(df, {
+    Clade <- substr(hit, 1, 1)
+    Subtype <- gsub(hit, pattern="_[A-Z]{2}[0-9]{6}", replacement="")
+    Subtype <- gsub(Subtype, pattern="_multiple", replacement="")
+    Subtype2 <- ifelse(as.numeric(sim)==100, paste0("'", Subtype, "'"),
+                       paste0("'[", rep(rle(sort(Subtype))$values, times=rle(sort(Subtype))$lengths), "]'^", 
+                              unlist(lapply(rle(sort(Subtype))$lengths, seq_len)))[order(order(Subtype))])
+    #Subtype <- ifelse(as.numeric(sim)==100, Subtype, paste("*", Subtype, sep=""))
+  })
+}
+
+tax_table(phy97.f) <- as.matrix(get.st(data.frame(tax_table(phy97.f), stringsAsFactors=FALSE)))
+tax_table(phy100.f) <- as.matrix(get.st(data.frame(tax_table(phy100.f), stringsAsFactors=FALSE)))
+
+```
+* Minimum count to retain OTU: `r n`
+* Minimum count to retain sample: `r sn`
+
+#### Descriptive stats of Filtered datasets
+```{r phy.f_histograms, fig.height=4, fig.width=8}
+# Compute summary statistics
+stats97.f <- data.frame(`97% OTUs`=t(phystats(phy97.f)), check.names=F)
+stats100.f <- data.frame(`100% OTUs`=t(phystats(phy100.f)), check.names=F)
+
+# Create and plot histograms
+taxhist97 <- hist(log10(taxa_sums(phy97.f)), plot=F)
+taxhist100 <- hist(log10(taxa_sums(phy100.f)), plot=F)
+samhist97 <- hist(log10(sample_sums(phy97.f)), plot=F)
+samhist100 <- hist(log10(sample_sums(phy100.f)), plot=F)
+
+par(mfrow=c(2, 4), mar=c(3,3,1,1))
+plot(taxhist97, col="black", main="97% OTU counts", xlim=c(0, 6), las=1, mgp=c(2,0.5,0),
+     xlab="No. sequences (log10)", ylab="No. OTUs", cex.lab=0.75, cex.axis=0.75)
+plot(taxhist100, col="black", main="100% OTU counts", xlim=c(0, 6), las=1, mgp=c(2,0.5,0),
+     xlab="No. sequences (log10)", ylab="No. OTUs", cex.lab=0.75, cex.axis=0.75)
+plot(samhist97, col="black", main="97% OTU reads per sample", xlim=c(0, 6), las=1, mgp=c(2,0.5,0),
+     xlab="No. sequences (log10)", ylab="No. samples", cex.lab=0.75, cex.axis=0.75)
+plot(samhist100, col="black", main="100% OTU reads per sample", xlim=c(0, 6), las=1, mgp=c(2,0.5,0),
+     xlab="No. sequences (log10)", ylab="No. samples", cex.lab=0.75, cex.axis=0.75)
+
+# Create stats table
+knitr::kable(cbind(stats97.f, stats100.f))
+```
+
+
+### Transform count data
+Count data are transformed to both relative abundance (proportions) and square-root proportions for downstream statistical analyses.
+```{r transform}
+# Convert to proportion (relative abundance)
+phy97.f.p <- transform_sample_counts(phy97.f, function(x) x/sum(x))
+phy100.f.p <- transform_sample_counts(phy100.f, function(x) x/sum(x))
+# Apply transformation function
+transform <- function(x) sqrt(x/sum(x))  # Set transformation function
+phy97.f.t <- transform_sample_counts(phy97.f, transform)  # Transform data
+phy100.f.t <- transform_sample_counts(phy100.f, transform)
+```
+
+### Clade overview
+```{r}
+# Clade overview
+cladeAbund <- aggregate(data.frame(RelAbund=rowSums(otu_table(phy97.f.p))),
+                        by=list(Clade=data.frame(tax_table(phy97.f.p))$Clade), FUN=sum)
+cladeAbund$Prop <- prop.table(cladeAbund$RelAbund)
+
+bars <- barplot(cladeAbund$Prop*100, col=taxcolors, space=0,
+                names.arg=cladeAbund$Clade, xlab=expression(paste(italic('Symbiodinium'), " Clade")),
+                ylab="Relative abundance (%)")
+text(bars, cladeAbund$Prop*100+2, labels=round(cladeAbund$Prop*100, 1), xpd=T)
+
+cladeAbund$Notus <- table(data.frame(tax_table(phy97.f.p))$Clade)
+cladeAbund
+
+# Are Clade I's real?
+CladeI <- subset_taxa(phy97.f.p, Clade=="I")
+tax_table(CladeI)
+
+
+# Clades by sample
+source("~/Documents/Academia/HIMB/USVI/STJ2012/R/functions.R")
+composition <- function(phy, col, legend=T) {
+  samdat <- data.frame(sample_data(phy))
+  #samdat$Genus <- factor(samdat$Genus, levels=rev(levels(samdat$Genus)))
+  samdat$Species <- factor(samdat$Species, levels=rev(levels(samdat$Species)))
+  samdat$Site <- factor(samdat$Location, levels=rev(levels(samdat$Location)))
+  samdat <- samdat[with(samdat, order(Species, Site)), ]
+  typerelabund <- as.matrix(otu_table(phy)[order(data.frame(tax_table(phy))$hit), 
+                                           rownames(samdat)])
+  sitebreaks <- c(as.character(samdat$Site), "X")==c("X", as.character(samdat$Site))
+  sitebreaks <- which(sitebreaks==F) - 1
+  spbreaks <- c(which(duplicated(samdat$Species)==F) - 1, nrow(samdat))
+  
+  
+  # Make Barplot
+  barplot(typerelabund, horiz=T, space=0, axes=F,axisnames=F, yaxs="i", col=col)
+  rect(0, 0, par("usr")[2], par("usr")[4], lwd=1, xpd=T)
+  axis(side=1, at=seq(0, 1, 0.1), line=0, tck=-0.025, mgp=c(0,0.25,0), cex.axis=0.7)
+  mtext(side=1, "Relative abundance", cex=0.7, line=1)
+  # Add legend
+  if (legend==T) {
+    legend(x=par("usr")[2]/2, y=par("usr")[4], xjust=0.5, yjust=0.25, horiz=T, bty="n", xpd=T, 
+           cex=0.7, legend=c("A", "B", "C", "D", "F", "G"), fill=taxcolors, x.intersp=0.5)
+    legend(x=par("usr")[2]*1.1, y=par("usr")[4]*0.75, xjust=0, yjust=0.1, bty="n", xpd=T, cex=1, 
+           pt.cex=1, legend=c("White Point", "West Tektite", "Cocoloba", "Cabritte Horn", "Booby Rock"), fill=c("red", "orange", "yellow", "green", "blue"), y.intersp=0.7, 
+           x.intersp=0.3)
+  }
+  # Add grouping bars for Site
+  sitecolors <- matrix(c("red", "orange", "yellow", "green", "blue"), 
+              dimnames=list(c("White Point", "West Tektite", "Cocoloba", "Cabritte Horn", "Booby Rock"))) 
+  for (i in 1:length(sitebreaks)) {
+    lines(c(0, 1), c(sitebreaks[i], sitebreaks[i]), lty=2, lwd=0.25)
+    rect(1.01, sitebreaks[i], 1.04, sitebreaks[i+1], col=sitecolors[samdat$Site[sitebreaks[i]+1],], 
+         lwd=0.25, xpd=T)
+  }
+  
+  # Add lines to separate species and species names
+  for (i in 1:length(spbreaks)) {
+    lines(c(0, 1.07), c(spbreaks[i], spbreaks[i]), xpd=T, type="l", lwd=0.4)
+    text(1.03, (spbreaks[i] + spbreaks[i+1]) / 2, xpd=T, pos=4, cex=0.8,
+         labels=paste(samdat$Genus[which(duplicated(samdat$Species)==F)][i], "\n",
+                      samdat$Species[which(duplicated(samdat$Species)==F)][i], sep=""))
+  }
+}
+
+par(mfrow=c(1,1), mar=c(2, 1.5, 2, 10), lwd=0.1, cex=0.7, xpd=NA)
+# Plot composition of 97% within-sample OTUs colored by clade
+composition(phy97.f.p, col=taxcolors[factor(data.frame(tax_table(phy97.f.p))[order(data.frame(tax_table(phy97.f.p))$Subtype), ]$Clade, levels=c("A","B","C","D","F","G"))], legend=T)
+
+
+composition(phy97.f.p, col=rainbow(ntaxa(phy97.f.p)), legend=F)
+```
+
+# *Symbiodinium* in each coral
+For each coral species, barplots are presented showing the relative abundance of OTUs obtained by 100% and 97%-within-sample clustering. OTUs comprising more than 4% of a sample are labeled with the unique OTU number and the *Symbiodinium* subtype and NCBI GenBank accession number of the closest BLAST hit for that OTU in the reference database. OTU numbers and barplot colors are NOT comparable across clustering methods.
+
+## *Pseudodiploria strigosa*  
+```{r pstr, fig.height=8, fig.width=12}
+source("R/functions.R")
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+pstr97.f.p <- subset_samples(phy97.f.p, Species=="Pstr")
+pstr100.f.p <- subset_samples(phy100.f.p, Species=="Pstr")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(pstr97.f.p, main="97% OTUs")
+otubarplot(pstr100.f.p, main="100% OTUs")
+```
+
+```{r pstr.net, fig.height=6, fig.width=6}
+pstr.net <- makenet(pstr97.f.p, 0)
+set.seed(54538)
+plotnet(pstr.net)
+```
+
+## *Siderastrea siderea*  
+```{r ssid, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+ssid97.f.p <- subset_samples(phy97.f.p, Species=="Ssid")
+ssid100.f.p <- subset_samples(phy100.f.p, Species=="Ssid")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(ssid97.f.p, main="97% OTUs")
+otubarplot(ssid100.f.p, main="100% OTUs")
+```
+
+```{r ssid.net, fig.height=6, fig.width=6}
+ssid.net <- makenet(ssid97.f.p, 0)
+set.seed(54538)
+plotnet(ssid.net)
+```
+
+## *Dendrogyra cylindrus*  
+```{r dcyl, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+dcyl97.f.p <- subset_samples(phy97.f.p, Species=="Dcyl")
+dcyl100.f.p <- subset_samples(phy100.f.p, Species=="Dcyl")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(dcyl97.f.p, main="97% OTUs")
+otubarplot(dcyl100.f.p, main="100% OTUs")
+```
+
+```{r dcyl.net, fig.height=6, fig.width=6}
+dcyl.net <- makenet(dcyl97.f.p, 0)
+set.seed(54538)
+plotnet(dcyl.net)
+```
+
+## *Favia fragum*  
+```{r ffra, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+ffra97.f.p <- subset_samples(phy97.f.p, Species=="Ffra")
+ffra100.f.p <- subset_samples(phy100.f.p, Species=="Ffra")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(ffra97.f.p, main="97% OTUs")
+otubarplot(ffra100.f.p, main="100% OTUs")
+```
+
+```{r ffra.net, fig.height=6, fig.width=6}
+ffra.net <- makenet(ffra97.f.p, 0)
+set.seed(54538)
+plotnet(ffra.net)
+```
+
+## *Montastraea cavernosa*  
+```{r mcav, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+mcav97.f.p <- subset_samples(phy97.f.p, Species=="Mcav")
+mcav100.f.p <- subset_samples(phy100.f.p, Species=="Mcav")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(mcav97.f.p, main="97% OTUs")
+otubarplot(mcav100.f.p, main="100% OTUs")
+```
+
+```{r mcav.net, fig.height=6, fig.width=6}
+mcav.net <- makenet(mcav97.f.p, 0)
+set.seed(54538)
+plotnet(mcav.net)
+```
+
+## *Madracis mirabilis*  
+```{r mmir, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+mmir97.f.p <- subset_samples(phy97.f.p, Species=="Mmir")
+mmir100.f.p <- subset_samples(phy100.f.p, Species=="Mmir")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(mmir97.f.p, main="97% OTUs")
+otubarplot(mmir100.f.p, main="100% OTUs")
+```
+
+```{r mmir.net, fig.height=6, fig.width=6}
+mmir.net <- makenet(mmir97.f.p, 0)
+set.seed(54538)
+plotnet(mmir.net)
+```
+
+## *Orbicella annularis*  
+```{r oann, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+oann97.f.p <- subset_samples(phy97.f.p, Species=="Oann")
+oann100.f.p <- subset_samples(phy100.f.p, Species=="Oann")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(oann97.f.p, main="97% OTUs")
+otubarplot(oann100.f.p, main="100% OTUs")
+```
+
+```{r oann.net, fig.height=6, fig.width=6}
+oann.net <- makenet(oann97.f.p, 0)
+set.seed(54538)
+plotnet(oann.net)
+```
+
+## *Porites astreoides*  
+```{r past, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+past97.f.p <- subset_samples(phy97.f.p, Species=="Past")
+past100.f.p <- subset_samples(phy100.f.p, Species=="Past")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(past97.f.p, main="97% OTUs")
+otubarplot(past100.f.p, main="100% OTUs")
+```
+
+```{r past.net, fig.height=6, fig.width=6}
+past.net <- makenet(past97.f.p, 0)
+set.seed(54538)
+plotnet(past.net)
+```
+
+## *Siderastrea radians*  
+```{r srad, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+srad97.f.p <- subset_samples(phy97.f.p, Species=="Srad")
+srad100.f.p <- subset_samples(phy100.f.p, Species=="Srad")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(srad97.f.p, main="97% OTUs")
+otubarplot(srad100.f.p, main="100% OTUs")
+```
+
+```{r srad.net, fig.height=6, fig.width=6}
+srad.net <- makenet(srad97.f.p, 0)
+set.seed(54538)
+plotnet(srad.net)
+```
+
+## *Water*  
+```{r watr, fig.height=8, fig.width=12}
+# Create subsetted phyloseq objects for Pseudodiploria strigosa
+watr97.f.p <- subset_samples(phy97.f.p, Species=="Water")
+watr100.f.p <- subset_samples(phy100.f.p, Species=="Water")
+# Plot custom barplots for Pseudodiploria strigosa
+par(mfrow=c(2,1), mar=c(4,4,2,2), mgp=c(0,0.5,0), lwd=0.1)
+otubarplot(watr97.f.p, main="97% OTUs")
+otubarplot(watr100.f.p, main="100% OTUs")
+```
+
+```{r watr.net, fig.height=6, fig.width=6}
+watr.net <- makenet(watr97.f.p, 0)
+set.seed(54538)
+plotnet(watr.net)
+```
+
+
