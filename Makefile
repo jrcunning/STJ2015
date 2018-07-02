@@ -1,4 +1,4 @@
-all: data/all_rep_set_rep_set_nw_tophits.tsv
+all: data/clust/all_rep_set_rep_set_nw_tophits.tsv
 
 #data/STJ2015_sym.RData: data/STJ2015.RData data/otus_97_bysample/all_rep_set_rep_set.fasta
 #	R --vanilla < ~/SymITS2/filter_notsym.R --args $^ data/STJ2015_sym.RData /Volumes/CoralReefFutures/ref/ncbi_nt/nt
