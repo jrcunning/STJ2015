@@ -17,8 +17,8 @@ source("R/functions.R")
 # Load package libraries
 library(phyloseq); library(vegan); library(multcompView); library(reshape2); library(igraph); library(stringr)
 # Set colors for plotting clades
-taxcolors <- matrix(c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462"), 
-                    dimnames=list(c("CladeA", "CladeB", "CladeC", "CladeD", "CladeF", "CladeG")))
+taxcolors <- matrix(c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "black"), 
+                    dimnames=list(c("CladeA", "CladeB", "CladeC", "CladeD", "CladeF", "CladeG", "CladeI")))
 ```
 
 ```{r}
@@ -28,7 +28,7 @@ load("data/STJ2015_sym.RData"); phy97.f <- phy.f
 
 # Filter OTUs by minimum count
 # Set threshold count
-n <- 10
+n <- 2
 # Identify OTUs below threshold count
 taxa97 <- taxa_sums(phy97.f)[which(taxa_sums(phy97.f) >= n)]
 taxa100 <- taxa_sums(phy100.f)[which(taxa_sums(phy100.f) >= n)]
@@ -131,7 +131,7 @@ CladeI <- subset_taxa(phy97.f.p, Clade=="I")
 
 
 # Clades by sample
-source("~/Documents/Academia/HIMB/USVI/STJ2012/R/functions.R")
+source("R/functions.R")
 composition <- function(phy, col, legend=T) {
   samdat <- data.frame(sample_data(phy))
   #samdat$Genus <- factor(samdat$Genus, levels=rev(levels(samdat$Genus)))
@@ -153,7 +153,7 @@ composition <- function(phy, col, legend=T) {
   # Add legend
   if (legend==T) {
     legend(x=par("usr")[2]/2, y=par("usr")[4], xjust=0.5, yjust=0.25, horiz=T, bty="n", xpd=T, 
-           cex=0.7, legend=c("A", "B", "C", "D", "F", "G"), fill=taxcolors, x.intersp=0.5)
+           cex=0.7, legend=c("A", "B", "C", "D", "F", "G", "I"), fill=taxcolors, x.intersp=0.5)
     legend(x=par("usr")[2]*1.1, y=par("usr")[4]*0.75, xjust=0, yjust=0.1, bty="n", xpd=T, cex=1, 
            pt.cex=1, legend=c("White Point", "West Tektite", "Cocoloba", "Cabritte Horn", "Booby Rock"), fill=c("red", "orange", "yellow", "green", "blue"), y.intersp=0.7, 
            x.intersp=0.3)
@@ -178,7 +178,7 @@ composition <- function(phy, col, legend=T) {
 
 par(mfrow=c(1,1), mar=c(2, 1.5, 2, 10), lwd=0.1, cex=0.7, xpd=NA)
 # Plot composition of 97% within-sample OTUs colored by clade
-composition(phy97.f.p, col=taxcolors[factor(data.frame(tax_table(phy97.f.p))[order(data.frame(tax_table(phy97.f.p))$Subtype), ]$Clade, levels=c("A","B","C","D","F","G"))], legend=T)
+composition(phy97.f.p, col=taxcolors[factor(data.frame(tax_table(phy97.f.p))[order(data.frame(tax_table(phy97.f.p))$Subtype), ]$Clade, levels=c("A","B","C","D","F","G","I"))], legend=T)
 
 
 composition(phy97.f.p, col=rainbow(ntaxa(phy97.f.p)), legend=F)
@@ -362,6 +362,33 @@ plotnet(watr.net)
 ```{r, fig.height=4, fig.width=8}
 plot_richness(subset_samples(phy97.f, Species=="Water"), x="Location")
 plot_richness(subset_samples(phy100.f, Species=="Water"), x="Location")
+```
+
+## Alpha diversity in corals
+```{r, fig.height=4, fig.width=8}
+plot_richness(subset_samples(phy97.f, Species=="Ssid"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Srad"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Past"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Pstr"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Dcyl"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Ffra"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Mmir"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Oann"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Mcav"), x="Location")
+plot_richness(subset_samples(phy97.f, Species=="Srad"), x="Location")
+plot_richness(subset_samples(phy97.f, Species!="Water"), x="Location")
+
+plot_richness(subset_samples(phy100.f, Species=="Ssid"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Srad"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Past"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Pstr"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Dcyl"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Ffra"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Mmir"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Oann"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Mcav"), x="Location")
+plot_richness(subset_samples(phy100.f, Species=="Srad"), x="Location")
+plot_richness(subset_samples(phy100.f, Species!="Water"), x="Location")
 ```
 
 
