@@ -1,12 +1,10 @@
 .RData
 .Rhistory
 .Rproj.user
+data/STJ2015_fastq.tar.gz
 data/fastq
 data/merge
 data/fasta
-data/otus_97_bysample/*
-!data/otus_97_bysample/all_rep_set_rep_set_nw_tophits.tsv
-!data/otus_97_bysample/all_rep_set_rep_set.fasta
-data/otus_100/*
-!data/otus_100/100_otus_rep_set_nw_tophits.tsv
-!data/otus_100/100_otus_rep_set.fasta
+data/clust/*
+!data/clust/all_rep_set_rep_set_nw_tophits.tsv
+!data/clust/all_rep_set_rep_set.fasta
