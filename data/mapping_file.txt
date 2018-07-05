@@ -178,3 +178,53 @@
 484	484_MERGED-MAX-MISMATCH-3	Water	Cocoloba	Water	24	0	7/19/15	12-1pm
 485	485_MERGED-MAX-MISMATCH-3	Water	Cocoloba	Water	20	0	7/19/15	12-1pm
 486	486_MERGED-MAX-MISMATCH-3	Water	Cocoloba	Water	40	0	7/19/15	12-1pm
+408	408_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	3.8	-0.7	7/16/15	9-10am
+409	409_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	8	0	7/16/15	9-10am
+410	410_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	12	0	7/16/15	9-10am
+411	411_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	15.8	0.15	7/16/15	9-10am
+412	412_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	19.9	0	7/16/15	9-10am
+413	413_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	23.7	0.35	7/16/15	9-10am
+414	414_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	28.3	0	7/16/15	9-10am
+415	415_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	32	0	7/16/15	9-10am
+416	416_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	36.8	0	7/16/15	9-10am
+417	417_MERGED-MAX-MISMATCH-3	Sediment	West Tektite	Sediment	39.8	-0.1	7/16/15	9-10am
+427	427_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	32.3	0	7/16/15	3-4pm
+428	428_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	28	0	7/16/15	3-4pm
+429	429_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	12	0	7/16/15	3-4pm
+430	430_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	8.3	0	7/16/15	3-4pm
+431	431_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	24	0	7/16/15	3-4pm
+432	432_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	39.5	0	7/16/15	3-4pm
+433	433_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	19.8	0	7/16/15	3-4pm
+434	434_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	3.3	0	7/16/15	3-4pm
+435	435_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	36	0	7/16/15	3-4pm
+436	436_MERGED-MAX-MISMATCH-3	Sediment	White Point	Sediment	16.3	0	7/16/15	3-4pm
+447	447_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	23.5	0.4	7/18/15	9-10am
+448	448_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	31.8	0.6	7/18/15	9-10am
+449	449_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	4.7	-0.5	7/18/15	9-10am
+450	450_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	12	-0.4	7/18/15	9-10am
+451	451_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	19.9	0.1	7/18/15	9-10am
+452	452_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	28	0	7/18/15	9-10am
+453	453_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	16.2	-0.3	7/18/15	9-10am
+454	454_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	39.8	-0.2	7/18/15	9-10am
+455	455_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	35.8	0	7/18/15	9-10am
+456	456_MERGED-MAX-MISMATCH-3	Sediment	Cabritte Horn	Sediment	8.4	0	7/18/15	9-10am
+467	467_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	35.9	0.3	7/18/15	3-4pm
+468	468_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	31.8	0	7/18/15	3-4pm
+469	469_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	19.6	-0.3	7/18/15	3-4pm
+470	470_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	24.1	-0.2	7/18/15	3-4pm
+471	471_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	39.9	0.3	7/18/15	3-4pm
+472	472_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	15.8	-0.2	7/18/15	3-4pm
+473	473_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	27.8	0	7/18/15	3-4pm
+474	474_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	4.1	-0.3	7/18/15	3-4pm
+475	475_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	11.3	0	7/18/15	3-4pm
+476	476_MERGED-MAX-MISMATCH-3	Sediment	Booby Rock	Sediment	8.1	0	7/18/15	3-4pm
+487	487_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	35.4	-0.1	7/19/15	12-1pm
+488	488_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	32	0	7/19/15	12-1pm
+489	489_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	23.9	0	7/19/15	12-1pm
+490	490_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	19.9	-0.2	7/19/15	12-1pm
+491	491_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	11.95	0.1	7/19/15	12-1pm
+492	492_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	39.8	-0.1	7/19/15	12-1pm
+493	493_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	16.1	0	7/19/15	12-1pm
+494	494_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	8	0	7/19/15	12-1pm
+495	495_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	27.8	0.1	7/19/15	12-1pm
+496	496_MERGED-MAX-MISMATCH-3	Sediment	Cocoloba	Sediment	4	0.25	7/19/15	12-1pm
